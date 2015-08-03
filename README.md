@@ -2,9 +2,6 @@ This is my Data Visualization Final Project
 #Summary - in no more than 4 sentences, briefly introduce your data visualization and add any context that can help readers understand it
 My data is statistics for degree-granting 4-year or above post-secondary schools in the United States. My data visualization shows the number of these in different states of the United states.  It also shows the number of institutions per population amount.  There are some states that have a lot of schools, but they don't necessarily have a high number of schools per population size.
 
-
-My data is statistics for degree-granting 4-year or above post-secondary schools in the United States.  It is labelled by 
-
 #Design - explain any design choices you made including changes to the visualization after collecting feedback
 
 I downloaded data from the National Center for Education Statistics at http://nces.ed.gov/ipeds/datacenter/DataFiles.aspx from 2013.  I selected a subset of the data fields available, which includes state, region, Institutional Category (public/private non-profit/private for-profit), Carnegie Classification and Undergraduate Profile.
@@ -13,28 +10,26 @@ It contains statistics on admissions test scores, tuition, percent accepted, etc
 There was a lot of data and I needed to find a way to narrow down what I presented to show a story.  Instead of using the statistics, I did a summary count of institutions per state.
 I found a bar chart example online and tried to fit that to my data.  It highlighted the moused-over bar and I added a tooltip.  That's what I started out with.
 I had several sketches or ideas of how to improve:
+
 * Use a map of the US, mouseover each state with summary data for different statistics
 * Use a scatterplot with state on x axis and plot statistics on the y axis
 * Plot average state statistics in a bar chart (similar to the count (length) I now have
 * Color code bars by region of the country
 * Use stacked bar chart breaking down different characteristics for each state (count of public/private/for-profit for example)
 
-Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185|Data Visualization Final Project Take 2]
+Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185](Data Visualization Final Project Take 2)
 
 Here is an updated gist where I added the other data values - population, and number of Institutions per 100,000 of population.  You can sort by value (when checked) or else states are sorted alphabetically.
 http://gist.github.org/sstreisand/968d2752a1c0b1ce6dde/
 
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
+
 ###First Feedback (from Google+):
 Here is a link to the feedback thread on Google+:  https://plus.google.com/117771238554345892990/posts/ifm6kk1GcbE
 
-Francis CorriganJul 7, 2015
-
-
- 1
-Reply
- 
+Francis ...
+Jul 7, 2015
 Nice start! I love the basic steel blue d3 bar chart. It's simple and beautiful. Maybe it's because I'm on mobile, but I can't see the x labels (states)... I need to tap each bar to see the data. I would include the labels. Also, I would sort the data by state in descending order so instantly I can tell which states are highest, which are lowest, and which are in the middle. 
 
 Second observation is that I would be more interested in per capita data.... Perhaps something like 4 year degrees per square foot. Since CA and TX are huge states (by land mass) I would expect them to have more universities. However, if you did it by universities per square foot i would expect Massachusetts to be close to the top. Or maybe... Universities per capita would show something really cool? Either way, I think it adds a dimension to your graph.
