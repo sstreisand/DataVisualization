@@ -20,6 +20,10 @@ I had several sketches or ideas of how to improve:
 * Use stacked bar chart breaking down different characteristics for each state (count of public/private/for-profit for example)
 
 Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185|Data Visualization Final Project Take 2]
+
+Here is an updated gist where I added the other data values - population, and number of Institutions per 100,000 of population.  You can sort by value (when checked) or else states are sorted alphabetically.
+http://gist.github.org/sstreisand/968d2752a1c0b1ce6dde/
+
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
 ###First Feedback (from Google+):
@@ -46,6 +50,27 @@ Other feedback included:
 -  This is really nice looking graph, but after scrolling the mouse, I found myself thinking "so what".  You could use this graph to tell a story about access to 4-year college.  Group the states by region and superimpose a line of population by state.   The x-axis labels are cluttered and can't be seen without opening it in a separate window.  Try using the 2 letter state abbreviations and see if that cleans things up.﻿
 
 I also have a scatterplot that shows individual statistics for the schools mapped by state, but I didn't think that really showed anything interesting.
+
+I finally was able to re-enter the forums and received this feedback: (thread at https://discussions.udacity.com/t/requesting-help-and-feedback-on-my-project/27306/4 )
+
+Hi Susan,
+
+I am no d3 expert :), still learning....but my 2 cents regarding the tooltips are as follows:
+
+I suggest keep the tooltip size constant, making the width as long as the longest state name i.e.'District of Columbia' and adjusting height that could include 4 rows (state, Institutes, Pop. and Pop. density).
+
+Add Keys before values for ease of understanding (image attached as a suggestion).
+-----
+I like it! Other than the issues you mentioned, my only comment is that the vertical label on the y-axis that's just inside the plot area will overlap with the first bar. Perhaps you could move the label outside the plot area?
+
+If you figure out how to dynamically size the popup boxes to fit text, please let me know! smile
+
+And I completely sympathize with you on "It seems everytime I try to fix something I wind up breaking the whole thing." I know the frustration!
+Good Luck!
+
+Other than that, your project looks good to me and I like the way transition takes place when sorting is checked.
+
+I added the tooltip idea to make it as large as the largest location and added keys before values and put the vertical label outside the plot area.
 
 #Resources 
 - list any sources you consulted to create your visualization
