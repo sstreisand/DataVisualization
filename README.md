@@ -27,6 +27,8 @@ http://gist.github.org/sstreisand/968d2752a1c0b1ce6dde/
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
 ###First Feedback (from Google+):
+Here is a link to the feedback thread on Google+:  https://plus.google.com/117771238554345892990/posts/ifm6kk1GcbE
+
 Francis CorriganJul 7, 2015
 
 
