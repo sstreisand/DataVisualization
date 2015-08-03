@@ -19,6 +19,7 @@ I had several sketches or ideas of how to improve:
 * Color code bars by region of the country
 * Use stacked bar chart breaking down different characteristics for each state (count of public/private/for-profit for example)
 
+Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185|Data Visualization Final Project Take 2]
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
 ###First Feedback (from Google+):
