@@ -21,9 +21,30 @@ I had several sketches or ideas of how to improve:
 
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
+###First Feedback (from Google+):
+Francis CorriganJul 7, 2015
+
+
+ 1
+Reply
+ 
+Nice start! I love the basic steel blue d3 bar chart. It's simple and beautiful. Maybe it's because I'm on mobile, but I can't see the x labels (states)... I need to tap each bar to see the data. I would include the labels. Also, I would sort the data by state in descending order so instantly I can tell which states are highest, which are lowest, and which are in the middle. 
+
+Second observation is that I would be more interested in per capita data.... Perhaps something like 4 year degrees per square foot. Since CA and TX are huge states (by land mass) I would expect them to have more universities. However, if you did it by universities per square foot i would expect Massachusetts to be close to the top. Or maybe... Universities per capita would show something really cool? Either way, I think it adds a dimension to your graph.
+
+Lastly, I saw your comment about making a map. Do it! Even if you don't use it, I found that I've learned a lot about d3 and JavaScript in general by grinding through the process of creating a map. Good luck and please share your visualization when it is complete!﻿
+
+<The x labels don't show on bl.ocks.org unless you display in its own window, something about the frame size I suppose.  I added a checkbox to allow sorting data by highest to lowest.  I also added per capita data - per x of the population (I set x in my code), not per size.  I also added a map at the bottom.>
+
 - I received feedback that I should sort it by number of schools per state so I added the sort checkbox and it sorts by number of schools per state.  
 - I also received feedback to have a ratio of schools per population, so I added a pure population and a ration of schools per population as choices on the chart.
-- 
+
+Other feedback included:
+- include some more interesting info. For example, in your data there are religion/category divisions -- you can show this data by making staked bar-chart and/or include some (or most) of this information in popup.
+-  Nice visualization! Maybe you could add a bottom such that you could switch from absolute to per capita, so that people that are interested in having the absolute value could also have it. Also, the title of the y axis should be horizontal. Visually is much more simple because that way you don't have to turn your head. A last thing I would recommend is to remove the ticks from the horizontal axis. Keep up the good work!﻿
+-  This is really nice looking graph, but after scrolling the mouse, I found myself thinking "so what".  You could use this graph to tell a story about access to 4-year college.  Group the states by region and superimpose a line of population by state.   The x-axis labels are cluttered and can't be seen without opening it in a separate window.  Try using the 2 letter state abbreviations and see if that cleans things up.﻿
+
+I also have a scatterplot that shows individual statistics for the schools mapped by state, but I didn't think that really showed anything interesting.
 
 #Resources 
 - list any sources you consulted to create your visualization
