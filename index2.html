@@ -84,7 +84,7 @@ var textName = { "values": "Number of Schools",
 //fill in text that is dependent on variables maybe
 d3.select("h2").text("U.S. Postsecondary Education - Number of Degree-Granting 4-year institutions by State")
 d3.select("#cpl").append("text").text(" Number of Institutions per " + factor + " of Population");
-d3.select("#story").append("text").text("First we plot the number of schools per state to see if we see any trends:  California, New York, Pennsylvania, and Texas are states that seem to have a lot of schools.");
+d3.select("#story").append("text").html("First we plot the number of schools per state to see if we see any trends:" + "<br/>" + "California, New York, Pennsylvania, and Texas are states that seem to have a lot of schools.");
 // Set axes and scales
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
@@ -111,6 +111,9 @@ var div = d3.select("body")
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+d3.select("body").append("h3").attr("class", "MapName")
+    .attr("align", "center");
+
 // Before we load any data, get the map variables defined too:
 //Width and height
 var w = 960, h = 500;  // shape of svg
@@ -319,7 +322,7 @@ function change() {
 				     return (a.key < b.key) ? -1 :
 					 (a.key > b.key) ? 1 : 0; })
 		      .map(function(d) { return d.key; })).copy();
-    //     remove old x and y axies
+    //     remove old y axis 
 //    svg.selectAll(".x.axis").remove();
     svg.selectAll(".y.axis").remove();
     // get y domain (depends on data)
@@ -373,6 +376,7 @@ function change() {
 	]);
 //	debugger;
 	dataType = d3.select('input[name="ntype"]:checked').node().value;
+	d3.select('h3').text(textName[dataType]);
 	var map = svg2.selectAll("path")
 	    .data(jsonData.features)
 	    .enter()
