@@ -17,10 +17,13 @@ I had several sketches or ideas of how to improve:
 * Color code bars by region of the country
 * Use stacked bar chart breaking down different characteristics for each state (count of public/private/for-profit for example)
 
-Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185](Data Visualization Final Project Take 2)
+Here is my initial gist (it was slightly renovated from the initial design because I added the sort checkbox but forgot to save the original): [https://gist.github.org/sstreisand/85ab9c34324ea92fb185](Data Visualization Final Project Take 2)
 
 Here is an updated gist where I added the other data values - population, and number of Institutions per 100,000 of population.  You can sort by value (when checked) or else states are sorted alphabetically.
 http://gist.github.org/sstreisand/968d2752a1c0b1ce6dde/
+
+In my later iterations I added the choropleth based on feedback that said to try it even if I didn't use it.  I added a checkbox to show the map and in final iteration either the map shows or the chart shows.
+I added a story so that it starts off by guiding the viewer through charts (sorted and unsorted) and maps and then allows the viewer to select their own.
 
 #Feedback 
 - include all feedback you received from others on your visualization from the first sketch to the final visualization
@@ -85,3 +88,7 @@ I added the tooltip idea to make it as large as the largest location and added k
 + http://www.java2s.com/Code/JavaScript/Form-Control/Gettheradiobuttonselection.htm
 + Us-states.json comes from https://github.com/alignedleft/d3-book/blob/master/chapter_12/us-states.json
 + http://eyeseast.github.io/visible-data/2013/08/27/responsive-legends-with-d3/
++ http://stackoverflow.com/questions/3674265/is-there-an-easy-way-to-clear-an-svg-elements-contents
++ http://stackoverflow.com/questions/21838013/d3-choropleth-map-with-legend
++ http://stackoverflow.com/questions/29325040/get-value-of-checked-radio-button-using-d3-js
++ http://stackoverflow.com/questions/9522019/how-to-check-a-particular-radio-box-in-a-group-using-javascript
