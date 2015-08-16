@@ -1,6 +1,7 @@
 This is my Data Visualization Final Project
 #Summary - in no more than 4 sentences, briefly introduce your data visualization and add any context that can help readers understand it
 My data is statistics for degree-granting 4-year or above post-secondary schools in the United States. My data visualization shows the number of these in different states of the United states.  It also shows the number of institutions per population amount.  There are some states that have a lot of schools, but they don't necessarily have a high number of schools per population size.
+The file index8.html has my final project in it.
 
 #Design - explain any design choices you made including changes to the visualization after collecting feedback
 
