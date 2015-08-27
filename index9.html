@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  
+  .bar {
+    fill: steelblue;
+  }
+  
+  .bar:hover {
+    fill: brown;
+  }
+  
+  .axis {
+    font: 10px sans-serif;
+  }
+  
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+  
+  .x.axis path {
+    display: none;
+  }
+  .x.axis.sc-axis path {
+    display: initial;
+  }
+  h2 {
+    text-align: center;
+  }
+  .legend rect {
+    fill:white;
+    stroke:black;
+    opacity:0.8;
+  }
+  div.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 140px;
+    height: 56px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  td, th {
+    padding: 1px 4px;
+  }
+h3 {
+    text-align: center;
+} 
+.grid-line {
+    opacity: 0.2;
+}  
+</style>
+<body>
+  <h2 class="header"></h2>
+  <div id="story">Let's look at the Number of 4-year Degree-Granting Institutions Per State in the U.S.  We can plot the number of schools per state to see if we see any trends.</div>
+  <div id="selections"></div>
+  <button id="next" class="buttons">Next</button>
+  
+  
+  <script> //To even out single quote in emacs'</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js">
+    <!--script src="http://d3js.org/d3.v3.min.js"-->
+    
+    
+    //which version of d3.js are we supposed to use?
+    // tooltip is p. 162 of D3 Tips and Tricks
+  </script>
+
+  <script>
+  //index9.html is revision after first submission - add scatterplot
+  // per capita schools vs population
+var margin = {top: 20, right: 20, bottom: 80, left: 80},
+  width = 960 - margin.left - margin.right,
+  height = 500 - margin.top - margin.bottom;
+var factor = 100000; //Schools per <factor> of population
+var radius = 8; // radius of scatterplot
+var dataType = "values"; // What data are we graphing?
+var scatterplot = false;
+
+// Get nice text for labels
+var textName = { "values": "Number of Schools",
+		 "pop": "Population",
+		 "colPop": "Schools per " + factor + " of Population"};
+//set text for selections - make invisible initially
+var text2 = '<table align="right"><tr><td><table>' +
+    '<tr><th></th><th>Choose Which Data to Display</th></tr>	  <tr>' + 
+    '<td><input type="radio" name="ntype" value="values" class="rb" id="values" checked>' +
+    '</td><td> Number of Institutions</td></tr> <tr>' +
+    '<td><input type="radio" name="ntype" value="pop" class="rb" id="pop"></td>' +
+    '<td> State Population</td></tr> <tr>' +
+    '<td><input type="radio" name="ntype" value="colPop" class="rb" id="colPop"></td>' +
+    '<td id="cpl"> </td></tr></table></td> <td><table>' +
+    ' <tr><td><input type="checkbox" id="sortcheck" class="cb" ></td>' +
+    '<td> Sort values</td></tr>' +
+    '<tr><td><input type="checkbox" id="mapcheck" class="cb"></td>' +
+    '<td> Show Map</td></tr> </table></td></table>';
+
+// Set up our story in stages...
+var stages = [];
+var stage = 0;
+var isSortChecked = false, isMapChecked = false;
+var j = 0;
+stages[j++] = { story: "Now let's sort by Number of Schools." + "<br/>" + "California, New York, Pennsylvania, and Texas are states that seem to have a lot of schools.",
+		sort: true,
+		chart: true,
+		map: false,
+		dType: "values" };
+stages[j++] = { story: "Let's look at the map of number of schools per state.",
+		sort: true,
+		chart: false,
+		map: true,
+		dType: "values"};
+stages[j++] = { story: "But wait...  Shouldn't states with higher populations have more schools in general?  Let's look at state populations.",
+		sort: true,
+		chart: true,
+		map: false,
+		dType: "pop"};
+stages[j++] = { story: "Let's look at the map of state populations.  California, New York,  and Florida have the highest populations.",
+		sort: true,
+		chart: false,
+		map: true,
+		dType: "pop"};
+stages[j++] = { story: "How can we compare?  Let's look at the number of schools per " + factor + " of population.",
+		sort: true,
+		chart: true,
+		map: false,
+		dType: "colPop"};
+stages[j++] = { story: "Vermont seems to be the clear winner in terms of number of schools per population.  Hmm, interesting",
+		sort: true,
+		chart: false,
+		map: true,
+		dType: "colPop"};
+stages[j++] = { story: "Let's plot Colleges per " + factor + " population vs. state population to see if we can see any trends.  There does not seem to be an obvious trend, but you can see that the states with more than one institution per " + factor + " people have populations less than 12 million, and those with a ratio greater than 1.2 have populations less than 4 million.",
+                chart: false,
+                map: false,
+                dType: "scatterplot"};
+stages[j++] = { story: "You can now look around at the data for yourself.  Select which data to display and whether to display the map or chart.  If you uncheck 'Show Map' it will show the chart instead.",
+		sort: true,
+		chart: false,
+		map: true,
+		dType: "colPop"};
+
+d3.select("h2").text("U.S. Postsecondary Education - Number of Degree-Granting 4-year institutions by State")
+
+// Set axes and scales
+var x = d3.scale.ordinal()
+  .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+  .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom");
+
+var yAxis = d3.svg.axis()
+  .scale(y)
+  .orient("left")
+  .ticks(10);
+
+// create svg and div for display
+d3.select("body").append("h3").attr("class", "MapName")
+  .attr("align", "center");
+var svg = d3.select("body").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .attr('class', 'chart')
+  .append("g")
+
+var div = d3.select("body")
+  .append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
+// Before we load any data, get the map variables defined too:
+//Width and height
+var w = 960, h = 500;  // shape of svg
+//Format strings for different properites
+var d3format = { "values" : ".0f",
+	         "pop" : ".1e",
+	         "colPop" : ".3f"
+	       };
+//Define map projection
+var projection = d3.geo.albersUsa()
+    .scale([900])
+    .translate([w/2, h/2]);
+//Define path generator
+var path = d3.geo.path()
+    .projection(projection);
+//Define quantize scale to sort data values into buckets of color
+// is quantile or quantize better?  (started with quantize)
+var color = d3.scale.quantize()
+    .range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+// use same svg for map and chart, so do not initialize
+var legend;
+//Populate the selections of data types
+d3.select("#selections").style("opacity", 0)
+  .append("text").html(text2);
+//fill in text that is dependent on variables
+d3.select("#cpl").append("text").text(" Number of Institutions per " + factor + " of Population");
+var selNode = d3.select('input[name="ntype"]:checked').node();
+var buttons_selection = d3.selectAll(".buttons");
+
+
+
+// GET DATA---------------------------------------------------------------
+d3.csv("data/6272015-425.csv", function(d) {
+  d.state = d["HD2013.State abbreviation"];
+  return d;}, function(error, data) {
+    if (error) throw error;
+    // script taken from http://stackoverflow.com/questions/15125920/how-to-get-distinct-values-from-an-array-of-objects-in-javascript
+    
+    // Get list of distinct states
+    var unique = {};
+    var distinct = [];
+    for( var i in data ){
+      if( typeof(unique[data[i].state] == "undefined")) {
+	distinct.push(data[i].state); 
+      }
+      unique[data[i].state] = 0;
+    };
+    var states = Object.keys(unique).sort();
+    
+    // Help from http://www.remkohde.com/2013/03/25/d3-binding-multi-dimensional-arrays-and-deep-nested-data/   
+    
+    // Count Number of Schools in Each State
+    // ddata will contain rolled-up data and add population
+    var ddata = d3.nest()
+	.key(function(d) {return d.state;})
+	.rollup(function(d) {return d.length;})
+	.entries(data)
+	.sort(function(a ,b) {
+	  a.key < b.key ? -1 : a.key == b.key ? 0 : 1;});
+    
+    var pd = {}; //object state:population (associative array with state as key)
+    var pdata = []; //array to put population data in (by state and also has regions that are not used)
+    var jsonData;
+    
+    d3.csv("data/NST-EST2013-03.csv", function(error, pop_data) {
+      // read in population data
+      //State, 2013_Population
+      if (error) throw error;
+      //pd = {pop_data.State: pop_data.2013_Population};
+      pdata = pop_data; // This is supposed to save pop_data outside d3.csv (Closure), not needed if all contained
+      // create pd object
+      pop_data.forEach(function (d, i) {
+	pd[d.State] = removeCommas(d["2013_Population"]);
+      });
+      ddata.forEach(function(d) {
+	d.pop = pd[d.key]; //remember to remove commas from d.pop in display
+	d.colPop = +d.values/(d.pop/factor);
+      });
+      
+      // Now that we have ddata we can load the map
+      //Load in GeoJSON data
+      d3.json("data/us-states.json", function(json) {
+	//Merge the school data and GeoJSON
+	//Loop through once for each ag. data value
+	for (var i = 0; i < ddata.length; i++) {
+	  var dataState = ddata[i].key;
+	  
+	  //Grab data value, and convert from string to float
+	  // The one we want to use is ddata[dataType];
+	  //Find the corresponding state inside the GeoJSON
+	  for (var j = 0; j < json.features.length; j++) {
+	    
+	    var jsonState = json.features[j].properties.name;
+	    
+	    if (dataState == jsonState) {
+	      
+	      //Copy the data value into the JSON
+	      json.features[j].properties.values = ddata[i].values;
+	      json.features[j].properties.colPop = ddata[i].colPop;
+	      json.features[j].properties.pop = ddata[i].pop;
+	      
+	      //Stop looking through the JSON
+	      break;
+	      
+	    }
+	  }		
+	}
+	jsonData = json;
+        
+	// ALL DATA LOADED
+	var scrollToMap = document.querySelectorAll('.map')[0];
+	var scrollToChart = document.querySelectorAll('.header')[0];
+        //********************
+	var sortTimeout = setTimeout(function() {
+	  d3.select("input").property("checked", true).each(change);
+          //		d3.selectAll("radio").property("checked", true).each(change);
+	  d3.selectAll('.rb').property("checked", true).on('change', change);
+	  d3.selectAll('.cb').property("checked", true).on('change', change);
+	}, 2000);
+        
+	// set x and y domains
+	x.domain(ddata.sort(function (a, b) {
+	  return a.key < b.key ? -1 : a.key == b.key ? 0 : 1;})
+    		 .map(function(d) { return d.key; }));
+	// data is big data array, not ddata
+	// console.log("ddata[0] is " + ddata[0].key, ddata[0]);
+      	y.domain([0,d3.max(ddata,function(d) { return d[dataType]; })]);
+	// sorting taken from http://bl.ocks.org/mbostock/3885705
+        
+	d3.selectAll(".rb").on("change", change);
+      	d3.selectAll(".rb").on("change", function() {
+	  change()});
+	d3.selectAll(".cb").on("change", change);
+	
+        //********************
+        // calls change, so it has to be in same level
+        buttons_selection.on("click", function(d) {
+          // make button look inactve
+          d3.selectAll(".buttons").transition().duration(500)
+	    .style("background", "rgb(220, 244, 252)").style("color", "black")
+	    .style("opacity", 0.6);
+          
+          // make the button that is pressed look pressed
+          d3.select(this).transition().duration(500)
+            .style("background", "steelBlue").style("color", "white")
+            .style("opacity", 1);
+          // set radio value
+          d3.select("input#"+stages[stage].dType).property("checked", "true");
+          // set sort value
+          d3.select("#sortcheck").property("checked", stages[stage].sort);
+          // set map value
+          d3.select("#mapcheck").property("checked", stages[stage].map);
+          change();
+          //MIGHT BE WRONG?
+          d3.select("#story").html(stages[stage].story);
+          stage+=1;
+          if (stage < stages.length) {}
+          else {
+	    d3.select("#next").remove();
+	    d3.select("#selections").style("opacity", 1);
+          }
+        });
+
+        //****************
+        function deleteChart() {
+          //http://stackoverflow.com/questions/3674265/is-there-an-easy-way-to-clear-an-svg-elements-contents
+          svg.selectAll("*").remove();
+        }
+        function deleteMap() {
+          svg.selectAll("*").remove();
+        }
+        var tooltip_format = function(d) {
+          return ("State: " + d.key + "<br/>Population: " + d3.format(",")(d.pop) + "<br/># Institutions: " + d.values + "<br/>Pop Dens: " + d3.format(".3g")(d.colPop))
+        };
+        function drawChart() {
+          // Draw the chart
+          // Draw the x axis
+          d3.select('h3').text(textName[dataType]);
+          svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+	      return "rotate(-45)"
+            });
+	  // get y domain (depends on data)
+	  var y0 = y.domain([0, d3.max(ddata, function(d) {
+	    return d[dataType]; })]);	
+          // Draw the y axis
+          // Need to translate left and rotate -90 to get it on outside
+          svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "translate("+ -margin.left +",0) rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text(textName[dataType]); // Get pretty version of data name for label
+          
+          svg.selectAll(".bar")
+            .data(ddata)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) {  return x(d.key); })
+            .attr("width", x.rangeBand())
+            .attr("y", function(d) { return y(d[dataType]); })
+	    .attr("height", function(d) {
+	      //console.log(d[dataType], y(d[dataType]));
+	      return height - y(d[dataType]); })
+            .on("mouseover", function(d) {
+              div.transition()
+	        .duration(200)
+	        .style("opacity", .9);
+              div.html("State: " + d.key + "<br/>Population: " + d3.format(",")(d.pop) + "<br/># Institutions: " + d.values + "<br/>Pop Dens: " + d3.format(".3g")(d.colPop))
+	        .style("left", (d3.event.pageX) + "px")
+	        .style("top", (d3.event.pageY - 28) + "px"); })
+            .attr("align", "left")
+            .on("mouseout", function(d) {
+              div.transition()
+	        .duration(500)
+	        .style("opacity", 0);
+            });
+          
+          // Now we have set up the axes and can set up the transition/plot
+          // get x domain (depends on data and sorting)
+          var x0 = x.domain(ddata.sort(isSortChecked ?
+				       function(a, b) {
+				         return b[dataType] - a[dataType]; } :
+				       function(a, b) {
+				         return (a.key < b.key) ? -1 :
+					   (a.key > b.key) ? 1 : 0; })
+		            .map(function(d) { return d.key; }))
+	      .copy();
+	  //     remove old y axis 
+	  svg.selectAll(".y.axis").remove();
+          
+	  // set transition
+	  var transition = svg.transition().duration(750),
+	      delay = function(d, i) {return i * 50; };
+	  // attach data to bars
+	  svg.selectAll(".bar")
+	    .data(ddata)
+	    .sort(function(a, b) { return x0(a.key) - x0(b.key); });
+	  
+	  // redraw y axis
+	  svg.append("g")
+	    .attr("class", "y axis")
+	    .call(yAxis)
+	    .append("text")
+	    .attr("transform", "translate("+ -margin.left + ",0) rotate(-90)")
+	    .attr("y", 6)
+	    .attr("dy", ".71em")
+	    .style("text-anchor", "end")
+	    .text(textName[dataType]);
+	  
+	  transition.select(".x.axis")
+	    .call(xAxis)
+	    .selectAll("text")
+	    .style("text-anchor", "end")
+	    .attr("dx", "-.8em")
+	    .attr("dy", ".15em")
+	    .selectAll("g")
+	    .delay(delay);
+	  
+	  transition.selectAll(".bar")
+	    .call(yAxis)
+	    .delay(delay)
+	    .attr("x", function(d) { return x0(d.key); })
+	    .attr("y", function(d) {return y(d[dataType]);})
+	    .attr("height", function(d) {
+	      return height - y(d[dataType]);});
+        };
+
+	function drawMap() {
+	  //Load color domain, load data, redraw map
+	  color.domain([
+	    d3.min(ddata, function(d) { return d[dataType]; }), 
+	    d3.max(ddata, function(d) { return d[dataType]; })
+	  ]);
+	  d3.select('h3').text(textName[dataType]);
+  	  var map = svg.selectAll("path")
+	      .data(jsonData.features)
+	      .enter()
+	      .append("path")
+	      .attr("d", path)
+	      .attr("align", "center")
+              .style("fill", function(d) {
+		//Get data value
+		var value = d.properties[dataType] || "N/A";
+		if (value != "N/A") {
+		  //If value exists
+		  return color(value);
+		} else {
+		  return "#ccc";
+		}
+	      })
+	      .style("stroke-width", "1")
+	      .style("stroke", "rgb(0,0,0)")
+	      .on("mouseover", function(d) {
+		div.transition()
+		  .duration(200)
+		  .style("opacity", .9);
+		div .html("State: " + d.properties.name + "<br/>Population: " + d3.format(",")(d.properties.pop) + "<br/># Institutions: " + d.properties.values + "<br/>Pop Dens: " + d3.format(".3g")(d.properties.colPop))
+		  .style("left", (d3.event.pageX) + "px")
+		  .style("top", (d3.event.pageY - 28) + "px"); })
+	      .attr("align", "left")
+	      .on("mouseout", function(d) {
+		div.transition()
+		  .duration(500)
+		  .style("opacity", 0); });
+	  //INSERTED FROM http://stackoverflow.com/questions/21838013/d3-choropleth-map-with-legend
+	  if (legend) legend.remove();
+	  legend = svg.selectAll('g.legendEntry')
+	    .data(color.range())
+	    .enter()
+	    .append('g').attr('class', 'legendEntry');
+	  legend
+	    .append('rect')
+	    .attr("x", width - 800)
+	    .attr("y", function(d, i) {
+	      return i * 20;
+	    })
+	    .attr("width", 10)
+	    .attr("height", 10)
+	    .style("stroke", "black")
+	    .style("stroke-width", 1)
+	    .style("fill", function(d){return d;}); 
+	  //the data objects are the fill colors
+	  legend
+            .append('text')
+            .attr("x", width - 785) //leave 5 pixel space after the <rect>
+            .attr("y", function(d, i) {
+	      return i * 20;
+	    })
+            .attr("dy", "0.8em") //place text one line *below* the x,y point
+            .text(function(d,i) {
+	      var extent = color.invertExtent(d);
+	      //extent will be a two-element array, format it however you want:
+              var format = d3.format(d3format[dataType]);
+              return format(+extent[0]) + " - " + format(+extent[1]);
+	    });
+	  // INSERTED FROM http://stackoverflow.com/questions/21838013/d3-choropleth-map-with-legend
+        }
+        // Added from reviewer comments for last stage
+        function drawScatterplot() {
+        // from Nikolay's demo
+        // draw scatterplot per capita institutions vs. population
+        // x = pop, y = colPop
+        // use existing svg element
+        //change h3 text
+          d3.select('h3').text("Per Capita Institutions vs. Population by State");
+          
+          // change svg background from white to light gray
+          svg.append("rect")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("fill", "rgb(240, 232, 226)");
+          
+          // create two scales - both linear for now, x is pop, y is colPop
+          var sx = d3.scale.linear()
+              .range([0, width])
+              .domain([0,d3.max(ddata,function(d) { return d["pop"]; })]);
+          var sy = d3.scale.linear()
+              .range([height, 0])
+              .domain([0, d3.max(ddata, function(d) {return d["colPop"];})]);
+    
+          // a "g" element to hold axes
+          var axesG = svg.append("g").attr("class", "axes");
+          
+          // create axis elements
+          var xAxis = d3.svg.axis().scale(sx).orient("bottom")
+              .ticks(20);
+          var yAxis = d3.svg.axis().scale(sy).orient("left").ticks(10);
+          //.tickFormat(d3.format(d3format.pop));
+          ;// use default tick format
+
+          
+          // append axes elements to axesG container    
+          axesG.append("g")
+            .attr("class", "y axis all-axis")
+          // location for the y-axis: margin, margin
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(yAxis)
+          // add y-axis label
+            .append("text")
+            .attr("id", "y-axis")
+            .attr("class", "axis-label")
+          // rotate text so that it is vertical
+            .attr("transform", "translate(" + (- margin.left-5) + ", " + height/2 + ") rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+          // position text appropriately along the axis
+            .style("text-anchor", "middle")
+          // finally, specify the actual label
+            .text("Colleges per " + factor + " of Population");
+          
+          axesG.append("g")
+            .attr("class", "x axis sc-axis")
+            .attr("transform", "translate(" + margin.left + "," + (height + margin.top) +")")
+            .call(xAxis)
+            .selectAll("text")
+            .attr("class", "axis-label")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {return "rotate(-45)"})
+            .append("text") // text label for the x axis
+            .attr("transform", "translate(" + (width/2) + " ," + (height+margin.bottom) + ")")
+            .style("text-anchor", "middle")
+            .text("State Population")
+            .select("path")
+            .attr("display", 1);
+
+          svg.append("text")
+            .attr("class", "axis-label axis")
+            .attr("transform", "translate(" + (width/2 + margin.left) + " ," + (height+margin.bottom) + ")")
+            .attr("dx", "-.8em")
+            .attr("dy", ".30em")
+            .style("text-anchor", "middle top")
+            .text(" State Population");
+          
+// add grid-lines for the x-axis
+          d3.selectAll("g.sc-axis g.tick")
+            .append("line")
+            .classed("grid-line", true)
+          // they start at (0, 0) and go to (0, height - 2*margin)
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", 0)
+            .attr("y2", -height);
+//            .attr("y2", - (height - margin.top - margin.bottom));
+
+// add tooltip, but make it transparent for now
+          var tooltip = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+          
+// container for the scatter points
+          var bodyG = svg.append("g")
+              .attr("class", "scatter-g")
+              .attr("transform", "translate(" + margin.left + ", " +  margin.top + ")");
+// bind data to html elements - circles
+          var selection = bodyG.selectAll("circle.state")
+              .data(ddata, function(d) {return d.key;});
+    
+          // enter selection
+          // all points are colored blue by default
+          selection.enter().append("circle")
+            .attr("class", "state")
+            .attr("fill", "steelblue");
+          // am not defining extreme points at this time
+          function colorPoints(d) {
+            if (d.extreme) 
+              return "rgb(183, 32, 81)";
+            else
+              return "steelblue";
+          }
+          selection.exit().remove();
+          
+          // update selection handles animation so we use the duration()
+          // to specify a 2 second transition
+          selection.transition().duration(2000)
+          // we use scales to go from
+          // data elements (e.g. gdp per capita) to pixel locations cx and cy
+            .attr("cx", function(d) {return sx(d["pop"]);})
+            .attr("cy", function(d) {return sy(d["colPop"])})
+            .attr("r", radius)
+            .attr("fill", colorPoints);
+          
+          // specify a tooltip on mouseover
+          bodyG.selectAll("circle.state")
+            .on("mouseover", function(d) {
+              // use a d3.event.target to access the circle element
+              // that is being hovered on
+              d3.select(d3.event.target).transition().duration(200)
+                .attr("fill", "rgb(255, 128, 22)");
+              tooltip.transition().duration(200).style("opacity", .9);
+              tooltip.html(tooltip_format(d))
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY - 10) + "px");                    
+            })
+            .on("mouseout", function(d) {
+              d3.select(d3.event.target).transition().duration(500)
+                .attr("fill", colorPoints(d));
+              tooltip.transition().duration(500).style("opacity", 0);
+            });
+          
+        }
+        function change(){
+          //console.log("Entering change from this ", this);
+          isSortChecked = document.getElementById("sortcheck").checked;
+          isMapChecked = document.getElementById("mapcheck").checked;
+          //console.log("Stage is ", stage, stages[stage], isSortChecked, isMapChecked, "scatterplot is ", scatterplot);
+          if (stage < stages.length) {
+            if (stages[stage].dType == "scatterplot") scatterplot = true;
+          };
+          dataType = d3.select('input[name="ntype"]:checked').node().value;
+          if (isMapChecked) {
+	    deleteChart();
+	    drawMap(); }
+          else if (scatterplot) {
+            deleteMap();
+            deleteChart();
+            drawScatterplot();
+            scatterplot = false;
+          }
+          else if (((stage < stages.length) && (stages[stage].chart)) ||
+	           !isMapChecked){
+            deleteMap();
+	    drawChart();}
+        };   
+      })})});
+function scrollTo(hash) {
+  //http://stackoverflow.com/questions/3163615/how-to-scroll-html-page-to-given-anchor-using-jquery-or-javascript
+  location.hash = "#" + hash;
+}
+function removeCommas(a) {
+  if (typeof(a) == "string") {
+    a=a.replace(/\,/g,''); //  but a string, so convert it to number
+    a=parseInt(a,10);
+    return a;
+  }
+  else {
+    return a;
+  }
+}
+// from http://geoexamples.com/geoexamples/d3js/d3js_electoral_map/tooltipCode.html
+</script>
+  
+</body>
+</html>
